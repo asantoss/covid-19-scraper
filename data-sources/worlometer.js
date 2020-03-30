@@ -1,7 +1,9 @@
 const Puppeteer = require('puppeteer');
+require('dotenv').config();
 const fs = require('fs').promises;
 const path = require('path');
 const db = require('../models');
+const axios = require('axios');
 
 async function scraper(url, table_name, name) {
 	console.time();
@@ -67,23 +69,13 @@ async function scraper(url, table_name, name) {
 	}
 }
 
-async function main() {
+async function main([states, countries]) {
 	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
 	if (cleanDB[0].length && cleanDB[1].length) {
 		await Promise.all([
 			...cleanDB.map(array => [...array.map(model => model.destroy())])
 		]);
 	}
-	const countries = await scraper(
-		'https://www.worldometers.info/coronavirus/',
-		'main_table_countries_today',
-		'Todays_Country_data.json'
-	);
-	const states = await scraper(
-		'https://www.worldometers.info/coronavirus/country/us/',
-		'usa_table_countries_today',
-		'Today_Data.json'
-	);
 	await Promise.all([
 		db.state.bulkCreate([...states.filter(state => state['name'])], {
 			returning: true
@@ -96,4 +88,25 @@ async function main() {
 	return 'Sucessfully scraped worldometers';
 }
 // console.log(process.env.NODE_ENV);
-main().then(console.log);
+async function runScrape() {
+	const countries = await scraper(
+		'https://www.worldometers.info/coronavirus/',
+		'main_table_countries_today',
+		'Todays_Country_data.json'
+	);
+	const states = await scraper(
+		'https://www.worldometers.info/coronavirus/country/us/',
+		'usa_table_countries_today',
+		'Today_Data.json'
+	);
+	axios('127.0.0.1:3000/api/update', {
+		method: 'POST',
+		headers: {
+			access_token: process.env.ACCESS_TOKEN
+		},
+		body: JSON.stringify([countries, states])
+	});
+}
+runScrape();
+
+module.exports = main;
