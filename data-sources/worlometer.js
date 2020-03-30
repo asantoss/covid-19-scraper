@@ -8,7 +8,9 @@ const axios = require('axios');
 async function scraper(url, table_name, name) {
 	console.time();
 	const browser = await Puppeteer.launch({
-		headless: true
+		headless: true,
+		executablePath: '/usr/bin/chromium-browser',
+		timeout: 60000
 	});
 	const page = await browser.newPage();
 	await page.goto(url);
@@ -61,7 +63,7 @@ async function scraper(url, table_name, name) {
 		});
 		browser.close();
 		const absolutePath = path.join(__dirname, '../data/', name);
-		fs.writeFile(absolutePath, JSON.stringify(data)).catch(console.log);
+		// fs.writeFile(absolutePath, JSON.stringify(data)).catch(console.log);
 		console.timeEnd();
 		return data;
 	} catch (error) {
