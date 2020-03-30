@@ -40,7 +40,8 @@ app.post('/api/update', (req, res) => {
 	console.log(CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN);
 	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
 		// saveScrapeToDb()
-		console.log(req.body);
+		const { states, countries } = req.body;
+		saveScrapeToDb([states, countries]);
 	}
 	// db.state.bulkCreate([...states.filter(state => state['name'])], {
 	// 	returning: true

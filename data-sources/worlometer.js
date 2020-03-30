@@ -99,12 +99,16 @@ async function runScrape() {
 		'usa_table_countries_today',
 		'Today_Data.json'
 	);
-	axios('https://worldometer-puppet.herokuapp.com/api/update', {
+	axios({
 		method: 'POST',
+		url: 'https://worldometer-puppet.herokuapp.com/api/update',
 		headers: {
 			access_token: process.env.ACCESS_TOKEN
 		},
-		body: JSON.stringify([countries, states])
+		data: {
+			states,
+			countries
+		}
 	});
 }
 runScrape();
