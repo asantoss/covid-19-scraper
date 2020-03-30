@@ -99,7 +99,7 @@ async function runScrape() {
 		'usa_table_countries_today',
 		'Today_Data.json'
 	);
-	axios({
+	const response = await axios({
 		method: 'POST',
 		url: 'https://worldometer-puppet.herokuapp.com/api/update',
 		headers: {
@@ -110,6 +110,7 @@ async function runScrape() {
 			countries
 		}
 	});
+	return response;
 }
 runScrape();
 

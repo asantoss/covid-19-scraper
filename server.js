@@ -41,7 +41,16 @@ app.post('/api/update', (req, res) => {
 	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
 		// saveScrapeToDb()
 		const { states, countries } = req.body;
-		saveScrapeToDb([states, countries]);
+		saveScrapeToDb([states, countries])
+			.then(response => {
+				res.json({
+					message: 'Success',
+					axiosData: response
+				});
+			})
+			.catch(() => {
+				res.json("Couldn't save data to DB");
+			});
 	}
 	// db.state.bulkCreate([...states.filter(state => state['name'])], {
 	// 	returning: true
