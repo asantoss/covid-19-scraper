@@ -70,7 +70,6 @@ async function scraper(url, table_name, name) {
 async function main() {
 	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
 	if (cleanDB[0].length && cleanDB[1].length) {
-		console.log('Data found', cleanDB);
 		await Promise.all([
 			...cleanDB.map(array => [...array.map(model => model.destroy())])
 		]);
