@@ -15,6 +15,7 @@ module.exports = {
 				model: 'Country',
 				key: 'id'
 			},
+			defaultValue: 1,
 			onUpdate: 'CASCADE',
 			onDelete: 'SET NULL'
 		});

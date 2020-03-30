@@ -52,7 +52,7 @@ async function scraper(url, table_name, name) {
 					countryData.name !== 'Total:' &&
 					countryData.name !== 'World'
 				) {
-					countryList.push(countryData);
+					countryList.push({ ...countryData });
 				}
 			}
 			return countryList;
@@ -68,6 +68,13 @@ async function scraper(url, table_name, name) {
 }
 
 async function main() {
+	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
+	if (cleanDB[0].length && cleanDB[1].length) {
+		console.log('Data found', cleanDB);
+		await Promise.all([
+			...cleanDB.map(array => [...array.map(model => model.destroy())])
+		]);
+	}
 	const countries = await scraper(
 		'https://www.worldometers.info/coronavirus/',
 		'main_table_countries_today',
@@ -78,37 +85,16 @@ async function main() {
 		'usa_table_countries_today',
 		'Today_Data.json'
 	);
-	await countries.forEach(async countryData => {
-		if (countryData['name']) {
-			createDBEntries(countryData, 'country').catch(error =>
-				console.error(`Could not make entry in DB \n `, error)
-			);
-		}
-	});
-	await states.forEach(stateObject => {
-		if (stateObject['name']) {
-			stateObject.countryId = 1;
-			createDBEntries(stateObject, 'state').catch(error =>
-				console.error(`Could not make entry in DB \n `, error)
-			);
-		}
-	});
-	return 'Sucessfully scraped worldometers';
-}
+	await Promise.all([
+		db.state.bulkCreate([...states.filter(state => state['name'])], {
+			returning: true
+		}),
+		db.country.bulkCreate([...countries.filter(country => country['name'])], {
+			returning: true
+		})
+	]);
 
-async function createDBEntries(object, model) {
-	const dbEntry = await db[model].findOne({
-		where: { name: object.name }
-	});
-	if (dbEntry) {
-		await dbEntry.set({ ...object });
-		return;
-	} else {
-		await db[model].create({
-			...object
-		});
-		return;
-	}
+	return 'Sucessfully scraped worldometers';
 }
 // console.log(process.env.NODE_ENV);
 main().then(console.log);

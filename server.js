@@ -10,15 +10,17 @@ app.get('/', (req, res) => {
 });
 
 app.get('/api/countries', (req, res) => {
-	db.country.findAll({ raw: true }).then(models => {
-		if (models) {
-			res.json(models);
-		}
-	});
+	db.country
+		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
+		.then(models => {
+			if (models) {
+				res.json(models);
+			}
+		});
 });
 
 app.get('/api/states', (req, res) => {
-	db.state.findAll({ raw: true }).then(models => {
+	db.state.findAll({ raw: true,  attributes: { exclude: ['id', 'createdAt']  }).then(models => {
 		if (models) {
 			res.json(models);
 		}
