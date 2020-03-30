@@ -20,11 +20,13 @@ app.get('/api/countries', (req, res) => {
 });
 
 app.get('/api/states', (req, res) => {
-	db.state.findAll({ raw: true,  attributes: { exclude: ['id', 'createdAt']  }).then(models => {
-		if (models) {
-			res.json(models);
-		}
-	});
+	db.state
+		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
+		.then(models => {
+			if (models) {
+				res.json(models);
+			}
+		});
 });
 
 app.listen(process.env.PORT || 3000, () => {
