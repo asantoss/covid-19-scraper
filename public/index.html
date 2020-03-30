@@ -1,27 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link
+			rel="stylesheet"
+			href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+			integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+			crossorigin="anonymous"
+		/>
+		<link rel="stylesheet" href="style.css" />
+		<title>Covid 19 Scraper</title>
+	</head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <title>Covid 19 Scraper</title>
-</head>
-
-<body>
-    <main class="container-fluid">
-        <div class="row">
-            <div class="col-12 m-auto">
-                <h1>Covid-19 Worldometer Scraper</h1>
-            </div>
-        </div>
-        <form action="" class="row">
-            <select name="data-filter" id="">
-            </select>
-        </form>
-    </main>
-    <script src="./app.js"></script>
-</body>
-
+	<body>
+		<main class="container-fluid">
+			<div class="row">
+				<div class=" m-auto">
+					<h1>Covid-19 Worldometer Scraper</h1>
+				</div>
+			</div>
+			<div class="row my-5">
+				<select class="col-2 offset-3" name="data-filter" id="filterData">
+					<option value="countries">Countries</option>
+					<option value="states">US_States</option>
+				</select>
+				<div class="col-3 offset-2">
+					<h3>Last Updated:</h3>
+					<span id="lastUpdate"></span>
+				</div>
+			</div>
+			<div class="row m-auto">
+				<div class="offset-2 col-4">
+					<h3>JSON</h3>
+					<textarea name="" id="JSONarea" cols="80" rows="30"></textarea>
+				</div>
+				<div class="col-4">
+					<h3>CSV</h3>
+					<textarea name="" id="CSVarea" cols="80" rows="30"></textarea>
+				</div>
+			</div>
+		</main>
+		<script src="./app.js"></script>
+	</body>
 </html>
