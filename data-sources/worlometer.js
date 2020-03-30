@@ -110,6 +110,7 @@ async function runScrape() {
 			countries
 		}
 	});
+	console.log(response);
 	return response;
 }
 runScrape();
