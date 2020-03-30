@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
 			new_deaths: DataTypes.INTEGER,
 			active_cases: DataTypes.INTEGER,
 			serious_critical: DataTypes.INTEGER,
-			tot_cases_1m_pop: DataTypes.INTEGER,
-			deaths_1m_pop: DataTypes.INTEGER,
+			total_cases_1m_pop: DataTypes.FLOAT,
+			deaths_1m_pop: DataTypes.FLOAT,
 			first_case: DataTypes.STRING
 		},
 		{}

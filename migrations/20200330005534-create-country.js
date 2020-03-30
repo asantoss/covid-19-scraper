@@ -29,11 +29,11 @@ module.exports = {
 			serious_critical: {
 				type: Sequelize.INTEGER
 			},
-			tot_cases_1m_pop: {
-				type: Sequelize.INTEGER
+			total_cases_1m_pop: {
+				type: Sequelize.FLOAT
 			},
 			deaths_1m_pop: {
-				type: Sequelize.INTEGER
+				type: Sequelize.FLOAT
 			},
 			first_case: {
 				type: Sequelize.STRING

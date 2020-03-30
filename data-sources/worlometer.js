@@ -13,7 +13,7 @@ async function scraper(url, table_name, name) {
 	await page.waitForSelector('#' + table_name);
 	try {
 		const data = await page.evaluate(() => {
-			const cleanHeader = new RegExp(/[,/\n]/g);
+			const cleanHeader = new RegExp(/[\W]/g);
 			const rows = document.querySelectorAll('tr');
 			const countryList = [];
 			for (let i = 0; i !== rows.length; i++) {
@@ -24,20 +24,22 @@ async function scraper(url, table_name, name) {
 				for (let j = 0; j < cols.length; j++) {
 					let header = headers[j].innerText
 						.trim()
+						.replace(/[/,]/g, '')
 						.replace(cleanHeader, '_')
 						.toLowerCase();
-
+					const data = cols[j].innerText.trim().replace(/[,+]/g, '') || 0;
+					const dataInt = Number(data);
 					if (j === 0) {
 						header = 'name';
 					}
-					if (header === '1st_case') {
-						header = '';
+					if (header === 'tot_cases_1m_pop') {
+						header = 'total_cases_1m_pop';
 					}
-
-					const data = cols[j].innerText.trim().replace(/[,+]/g, '') || 0;
-					const dataInt = Number.parseInt(data, 10);
 					if (header === 'Source') {
 						continue;
+					}
+					if (header === 'reported_1st_case') {
+						header = 'first_case';
 					}
 					if (dataInt) {
 						countryData[header] = dataInt;
@@ -45,7 +47,11 @@ async function scraper(url, table_name, name) {
 						countryData[header] = data;
 					}
 				}
-				if (Object.keys(countryData)) {
+				if (
+					Object.keys(countryData) &&
+					countryData.name !== 'Total:' &&
+					countryData.name !== 'World'
+				) {
 					countryList.push(countryData);
 				}
 			}
@@ -61,25 +67,48 @@ async function scraper(url, table_name, name) {
 	}
 }
 
-const dataFolder = path.join(__dirname, '/data');
-
-scraper(
-	'https://www.worldometers.info/coronavirus/',
-	'main_table_countries_today',
-	'Todays_Country_data.json'
-).then(data => {
-	data.forEach(countryData => {
-		console.log(countryData);
-		// db.country.create({ ...countryData });
+async function main() {
+	const countries = await scraper(
+		'https://www.worldometers.info/coronavirus/',
+		'main_table_countries_today',
+		'Todays_Country_data.json'
+	);
+	const states = await scraper(
+		'https://www.worldometers.info/coronavirus/country/us/',
+		'usa_table_countries_today',
+		'Today_Data.json'
+	);
+	await countries.forEach(async countryData => {
+		if (countryData['name']) {
+			createDBEntries(countryData, 'country').catch(error =>
+				console.error(`Could not make entry in DB \n `, error)
+			);
+		}
 	});
-});
-
-scraper(
-	'https://www.worldometers.info/coronavirus/country/us/',
-	'usa_table_countries_today',
-	'Today_Data.json'
-).then(data => {
-	data.forEach(stateObject => {
-		db.state.set;
+	await states.forEach(stateObject => {
+		if (stateObject['name']) {
+			stateObject.countryId = 1;
+			createDBEntries(stateObject, 'state').catch(error =>
+				console.error(`Could not make entry in DB \n `, error)
+			);
+		}
 	});
-});
+	return 'Sucessfully scraped worldometers';
+}
+
+async function createDBEntries(object, model) {
+	const dbEntry = await db[model].findOne({
+		where: { name: object.name }
+	});
+	if (dbEntry) {
+		await dbEntry.set({ ...object });
+		return;
+	} else {
+		await db[model].create({
+			...object
+		});
+		return;
+	}
+}
+// console.log(process.env.NODE_ENV);
+main().then(console.log);
