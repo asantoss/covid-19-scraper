@@ -13,6 +13,7 @@ async function scraper(url, table_name, name) {
 		timeout: 60000
 	});
 	const page = await browser.newPage();
+	await page.setDefaultNavigationTimeout(0);
 	await page.goto(url);
 	await page.waitForSelector('#' + table_name);
 	try {
