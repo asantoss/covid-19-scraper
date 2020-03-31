@@ -39,11 +39,10 @@ app.post('/api/update', (req, res) => {
 	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
 		// saveScrapeToDb()
 		const { states, countries } = req.body;
-		saveScrapeToDb([states, countries])
+		saveScrapeToDb(states, countries)
 			.then(response => {
 				res.json({
-					message: 'Success',
-					axiosData: response
+					message: response
 				});
 			})
 			.catch(() => {
@@ -58,3 +57,22 @@ app.post('/api/update', (req, res) => {
 app.listen(process.env.PORT || 3000, () => {
 	console.log('Listening on port ' + 3000);
 });
+
+async function saveScrapeToDb(states, countries) {
+	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
+	if (cleanDB[0].length && cleanDB[1].length) {
+		await Promise.all([
+			...cleanDB.map(array => [...array.map(model => model.destroy())])
+		]);
+	}
+	await Promise.all([
+		db.state.bulkCreate([...states.filter(state => state['name'])], {
+			returning: true
+		}),
+		db.country.bulkCreate([...countries.filter(country => country['name'])], {
+			returning: true
+		})
+	]);
+
+	return 'Sucessfully scraped worldometers';
+}

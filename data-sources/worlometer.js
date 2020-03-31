@@ -1,8 +1,6 @@
 const Puppeteer = require('puppeteer');
 require('dotenv').config();
-const fs = require('fs').promises;
-const path = require('path');
-const db = require('../models');
+const date = require('../utils/date_func');
 const axios = require('axios');
 
 async function scraper(url, table_name, name) {
@@ -63,7 +61,7 @@ async function scraper(url, table_name, name) {
 			return countryList;
 		});
 		browser.close();
-		const absolutePath = path.join(__dirname, '../data/', name);
+		// const absolutePath = path.join(__dirname, '../data/', name);
 		// fs.writeFile(absolutePath, JSON.stringify(data)).catch(console.log);
 		console.timeEnd();
 		return data;
@@ -72,24 +70,6 @@ async function scraper(url, table_name, name) {
 	}
 }
 
-async function main([states, countries]) {
-	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
-	if (cleanDB[0].length && cleanDB[1].length) {
-		await Promise.all([
-			...cleanDB.map(array => [...array.map(model => model.destroy())])
-		]);
-	}
-	await Promise.all([
-		db.state.bulkCreate([...states.filter(state => state['name'])], {
-			returning: true
-		}),
-		db.country.bulkCreate([...countries.filter(country => country['name'])], {
-			returning: true
-		})
-	]);
-
-	return 'Sucessfully scraped worldometers';
-}
 // console.log(process.env.NODE_ENV);
 async function runScrape() {
 	const countries = await scraper(
@@ -113,9 +93,8 @@ async function runScrape() {
 			countries
 		}
 	});
-	console.log(response);
 	return response;
 }
-runScrape();
-
-module.exports = main;
+runScrape().then(response => {
+	console.log(`Successfully wrote everything to the DB, ${date()}`);
+});
