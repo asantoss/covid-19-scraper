@@ -36,7 +36,6 @@ app.post('/api/update', (req, res) => {
 	const CLIENT_ACCESS_TOKEN = req.headers.access_token;
 	const SERVER_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
-		// saveScrapeToDb()
 		const { states, countries } = req.body;
 		saveScrapeToDb(states, countries)
 			.then(response => {
