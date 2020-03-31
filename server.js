@@ -2,10 +2,9 @@ const express = require('express');
 const app = express();
 const path = require('path');
 const db = require('./models');
-const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const bodyParser = require('body-parser');
-const saveScrapeToDb = require('./data-sources/worlometer');
+
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
