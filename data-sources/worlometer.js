@@ -1,6 +1,5 @@
 const Puppeteer = require('puppeteer');
 require('dotenv').config();
-const cron = require('node-cron');
 const date = require('../utils/date_func');
 const axios = require('axios');
 
@@ -97,8 +96,6 @@ async function runScrape() {
 	return response;
 }
 
-cron.schedule('25 * * * *', function() {
-	runScrape().then(console.log);
-});
+runScrape();
 
 module.exports = runScrape;
