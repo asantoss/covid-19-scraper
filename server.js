@@ -4,18 +4,16 @@ const path = require('path');
 const db = require('./models');
 require('dotenv').config();
 const bodyParser = require('body-parser');
+const server = require('http').createServer(app);
+// const io = require('socket.io')(server);
 
-app.use(bodyParser.json());
-app.use(express.static('public'));
-
-app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname, 'public/index.html'));
-});
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/countries', (req, res) => {
 	db.country
 		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
-		.then(models => {
+		.then((models) => {
 			if (models) {
 				res.json(models);
 			}
@@ -25,22 +23,22 @@ app.get('/api/countries', (req, res) => {
 app.get('/api/states', (req, res) => {
 	db.state
 		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
-		.then(models => {
+		.then((models) => {
 			if (models) {
 				res.json(models);
 			}
 		});
 });
 
-app.post('/api/update', (req, res) => {
+app.post('/api/update_live', (req, res) => {
 	const CLIENT_ACCESS_TOKEN = req.headers.access_token;
 	const SERVER_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
 		const { states, countries } = req.body;
-		saveScrapeToDb(states, countries)
-			.then(response => {
+		saveScrapeLiveToDb(states, countries)
+			.then((response) => {
 				res.json({
-					message: response
+					message: response,
 				});
 			})
 			.catch(() => {
@@ -51,26 +49,48 @@ app.post('/api/update', (req, res) => {
 	// 	returning: true
 	// })
 });
+app.post('/api/update_daily/:model', (req, res) => {
+	const CLIENT_ACCESS_TOKEN = req.headers.access_token;
+	const SERVER_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+	if (CLIENT_ACCESS_TOKEN === SERVER_ACCESS_TOKEN) {
+		const { data } = req.body;
+		saveScrapeDailyToDb(data, req.params.model).then((response) => {
+			res.json({ message: response });
+		});
+	}
+});
 
-app.listen(process.env.PORT || 3000, () => {
+server.listen(process.env.PORT || 3000, () => {
 	console.log('Listening on port ' + 3000);
 });
 
-async function saveScrapeToDb(states, countries) {
-	const cleanDB = await Promise.all([db.country.findAll(), db.state.findAll()]);
+async function saveScrapeLiveToDb(states, countries) {
+	const cleanDB = await Promise.all([
+		db.country_live.findAll(),
+		db.state.findAll(),
+	]);
 	if (cleanDB[0].length && cleanDB[1].length) {
 		await Promise.all([
-			...cleanDB.map(array => [...array.map(model => model.destroy())])
+			...cleanDB.map((array) => [...array.map((model) => model.destroy())]),
 		]);
 	}
 	await Promise.all([
-		db.state.bulkCreate([...states.filter(state => state['name'])], {
-			returning: true
+		db.state_live.bulkCreate([...states.filter((state) => state['name'])], {
+			returning: true,
 		}),
-		db.country.bulkCreate([...countries.filter(country => country['name'])], {
-			returning: true
-		})
+		db.country_live.bulkCreate(
+			[...countries.filter((country) => country['name'])],
+			{
+				returning: true,
+			}
+		),
 	]);
+
+	return 'Sucessfully scraped worldometers';
+}
+
+async function saveScrapeDailyToDb(data, model) {
+	await db[model].bulkCreate([...data]);
 
 	return 'Sucessfully scraped worldometers';
 }

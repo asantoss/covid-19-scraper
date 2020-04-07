@@ -12,11 +12,12 @@ module.exports = (sequelize, DataTypes) => {
 			serious_critical: DataTypes.INTEGER,
 			total_cases_1m_pop: DataTypes.FLOAT,
 			deaths_1m_pop: DataTypes.FLOAT,
-			first_case: DataTypes.STRING
+			first_case: DataTypes.STRING,
+			entry_date: DataTypes.STRING,
 		},
 		{}
 	);
-	country.associate = function(models) {
+	country.associate = function (models) {
 		// associations can be defined here
 		country.hasMany(models.state);
 	};

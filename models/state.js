@@ -8,14 +8,15 @@ module.exports = (sequelize, DataTypes) => {
 			new_cases: DataTypes.INTEGER,
 			total_deaths: DataTypes.INTEGER,
 			new_deaths: DataTypes.INTEGER,
-			active_cases: DataTypes.INTEGER
+			active_cases: DataTypes.INTEGER,
+			entry_date: DataTypes.STRING,
 		},
 		{}
 	);
-	state.associate = function(models) {
+	state.associate = function (models) {
 		// associations can be defined here
 		state.belongsTo(models.country, {
-			onDelete: 'CASCADE'
+			onDelete: 'CASCADE',
 		});
 	};
 	return state;
