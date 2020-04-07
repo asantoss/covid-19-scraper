@@ -11,7 +11,7 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/countries', (req, res) => {
-	db.country
+	db.country_live
 		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
 		.then((models) => {
 			if (models) {
@@ -21,7 +21,7 @@ app.get('/api/countries', (req, res) => {
 });
 
 app.get('/api/states', (req, res) => {
-	db.state
+	db.state_live
 		.findAll({ raw: true, attributes: { exclude: ['id', 'createdAt'] } })
 		.then((models) => {
 			if (models) {
