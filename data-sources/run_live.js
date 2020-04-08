@@ -1,5 +1,6 @@
 // console.log(process.env.NODE_ENV);
 const scraper = require('./worlometer');
+const axios = require('axios');
 async function runScrape() {
 	const countries = await scraper(
 		'https://www.worldometers.info/coronavirus/',
