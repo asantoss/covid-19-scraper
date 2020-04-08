@@ -67,7 +67,7 @@ server.listen(process.env.PORT || 3000, () => {
 async function saveScrapeLiveToDb(states, countries) {
 	const cleanDB = await Promise.all([
 		db.country_live.findAll(),
-		db.state.findAll(),
+		db.state_live.findAll(),
 	]);
 	if (cleanDB[0].length && cleanDB[1].length) {
 		await Promise.all([
