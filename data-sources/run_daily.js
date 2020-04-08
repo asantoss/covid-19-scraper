@@ -18,7 +18,7 @@ async function runScrape() {
 
 	axios({
 		method: 'POST',
-		url: 'https://worldometer-puppet.herokuapp.com/api/update_daily/countries',
+		url: 'https://worldometer-puppet.herokuapp.com/api/update_daily/country',
 		headers: {
 			access_token: process.env.ACCESS_TOKEN,
 		},
@@ -28,7 +28,7 @@ async function runScrape() {
 	});
 	axios({
 		method: 'POST',
-		url: 'https://worldometer-puppet.herokuapp.com/api/update_daily/states',
+		url: 'https://worldometer-puppet.herokuapp.com/api/update_daily/state',
 		headers: {
 			access_token: process.env.ACCESS_TOKEN,
 		},

@@ -40,6 +40,7 @@ function dateLoop(year, month, day, site) {
 		if (month === 12 && i === maxDay) {
 			month = 0;
 		}
+
 		Urls.push({ url, dateStamp });
 		if (i === maxDay && month !== today.getMonth()) {
 			return [...Urls, ...dateLoop(date.getFullYear(), month + 1, 1, site)];
@@ -60,60 +61,88 @@ async function run_archives(inputDate) {
 	const day = date.getDate();
 	const year = date.getFullYear();
 	// const today = new Date();
-	const countryUrls = dateLoop(
-		year,
-		month,
-		day,
-		'https://www.worldometers.info/coronavirus/'
-	);
+	// const countryUrls = dateLoop(
+	// 	year,
+	// 	month,
+	// 	day,
+	// 	'https://www.worldometers.info/coronavirus/'
+	// );
 	const stateUrls = dateLoop(
 		year,
 		month,
 		day,
 		'https://www.worldometers.info/coronavirus/country/us/'
 	);
-
-	// console.log({ urls });
-	const scrapedFiles = path.join(__dirname, '../../data');
-	fs.readdir(scrapedFiles, (err, files) => {
-		if (err) console.error(err);
-		const filtered = files.filter((file) => path.extname(file) === '.json');
-		filtered.forEach((file) => {
-			fs.readFile(scrapedFiles + '/' + file, (err, data) => {
-				const myData = JSON.parse(data.toString());
-				myData.forEach((entry) => {
-					if (entry['cases']) {
-						entry.total_cases = entry['cases'];
-					}
-					if (entry['deaths']) {
-						entry.total_deaths = entry['deaths'];
-					}
-				});
-				fetch('http://localhost:3000/api/update_daily/country', {
-					method: 'POST',
-					headers: {
-						access_token: process.env.ACCESS_TOKEN,
-						'content-type': 'application/json',
-					},
-					body: JSON.stringify({ countries: myData }),
-				}).then((res) => {
-					if (res.status === 200) {
-						console.log('Success');
-					}
-				});
+	for (let i = 0; i < stateUrls.length; i++) {
+		const { url, dateStamp } = stateUrls[i];
+		await scraper(url, '#usa_table_countries_today').then((data) => {
+			data.forEach((el) => {
+				el.entry_date = dateStamp;
+			});
+			fetch('https://worldometer-puppet.herokuapp.com/api/update_daily/state', {
+				method: 'POST',
+				headers: {
+					access_token: process.env.ACCESS_TOKEN,
+					'content-type': 'application/json',
+				},
+				body: JSON.stringify({ data }),
+			}).then((res) => {
+				if (res.status === 200) console.log('success');
 			});
 		});
-	});
+	}
+
+	// stateUrls.forEach(async ({ url, dateStamp }) => {});
+	// console.log({ urls });
+	// const scrapedFiles = path.join(__dirname, '../../data');
+	// fs.readdir(scrapedFiles, (err, files) => {
+	// 	if (err) console.error(err);
+	// 	const filtered = files.filter((file) => path.extname(file) === '.json');
+	// 	filtered.forEach((file) => {
+	// 		fs.readFile(scrapedFiles + '/' + file, (err, data) => {
+	// 			const myData = JSON.parse(data.toString());
+	// 			myData.forEach((entry) => {
+	// 				if (entry['cases']) {
+	// 					entry.total_cases = entry['cases'];
+	// 				}
+	// 				if (entry['deaths']) {
+	// 					entry.total_deaths = entry['deaths'];
+	// 				}
+	// 			});
+	// 			fetch(
+	// 				'https://worldometer-puppet.herokuapp.com/api/update_daily/country',
+	// 				{
+	// 					method: 'POST',
+	// 					headers: {
+	// 						access_token: process.env.ACCESS_TOKEN,
+	// 						'content-type': 'application/json',
+	// 					},
+	// 					body: JSON.stringify({ data: myData }),
+	// 				}
+	// 			).then((res) => {
+	// 				if (res.status === 200) {
+	// 					console.log('Success');
+	// 				}
+	// 			});
+	// 		});
+	// 	});
+	// });
 }
 
-run_archives('01/29/2020');
+run_archives('03/18/2020');
 
 function getMonthTotal(year, month) {
 	return new Date(year, month + 1, 0).getDate();
 }
 
 function createArchiveStamp(year, month, day) {
-	return `${year}0${month}0${day}`;
+	if (day < 10) {
+		day = '0' + day;
+	}
+	if (month < 10) {
+		month = '0' + month;
+	}
+	return `${year}${month}${day}`;
 }
 
 // dateLoop(0, 29);
