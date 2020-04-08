@@ -1,4 +1,5 @@
-// console.log(process.env.NODE_ENV);
+require('dotenv').config();
+console.log(process.env.ACCESS_TOKEN);
 const scraper = require('./worlometer');
 const axios = require('axios');
 async function runScrape() {

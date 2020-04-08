@@ -10,7 +10,7 @@ async function scraper(url, table_name) {
 	// console.time();
 	const browser = await Puppeteer.launch({
 		headless: true,
-		executablePath: '/usr/bin/chromium-browser',
+		// executablePath: '/usr/bin/chromium-browser',
 	});
 	const page = await browser.newPage();
 	await page.setDefaultNavigationTimeout(0);

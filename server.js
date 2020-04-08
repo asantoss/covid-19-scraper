@@ -69,6 +69,7 @@ async function saveScrapeLiveToDb(states, countries) {
 		db.country_live.findAll(),
 		db.state_live.findAll(),
 	]);
+	console.log({ states, cleanDB });
 	if (cleanDB[0].length && cleanDB[1].length) {
 		await Promise.all([
 			...cleanDB.map((array) => [...array.map((model) => model.destroy())]),
